@@ -183,12 +183,20 @@ public final class ParentProjectSynchronizer
         initContext( sourceProject, targetProject );
 
         return sourceContext.callWith( () -> {
-            final Content sourceContent = contentService.getById( contentId );
+            if ( contentService.contentExists( contentId ) )
+            {
+                final Content sourceContent = contentService.getById( contentId );
 
-            return targetContext.callWith( () -> {
-                final Content targetContent = contentService.getById( contentId );
-                return doSyncRenamed( sourceContent, targetContent );
-            } );
+                return targetContext.callWith( () -> {
+                    if ( contentService.contentExists( contentId ) )
+                    {
+                        final Content targetContent = contentService.getById( contentId );
+                        return doSyncRenamed( sourceContent, targetContent );
+                    }
+                    return null;
+                } );
+            }
+            return null;
         } );
 
     }
@@ -229,12 +237,20 @@ public final class ParentProjectSynchronizer
         initContext( sourceProject, targetProject );
 
         return sourceContext.callWith( () -> {
-            final Content sourceContent = contentService.getById( contentId );
+            if ( contentService.contentExists( contentId ) )
+            {
+                final Content sourceContent = contentService.getById( contentId );
 
-            return targetContext.callWith( () -> {
-                final Content targetContent = contentService.getById( contentId );
-                return doSyncMoved( sourceContent, targetContent );
-            } );
+                return targetContext.callWith( () -> {
+                    if ( contentService.contentExists( contentId ) )
+                    {
+                        final Content targetContent = contentService.getById( contentId );
+                        return doSyncMoved( sourceContent, targetContent );
+                    }
+                    return null;
+                } );
+            }
+            return null;
         } );
 
     }
@@ -274,19 +290,23 @@ public final class ParentProjectSynchronizer
         initContext( sourceProject, targetProject );
 
         return sourceContext.callWith( () -> {
-            final Content sourceContent = contentService.getById( contentId );
+            if ( contentService.contentExists( contentId ) )
+            {
+                final Content sourceContent = contentService.getById( contentId );
 
-            return targetContext.callWith( () -> {
-                if ( contentService.contentExists( contentId ) )
-                {
-                    final Content targetContent = contentService.getById( contentId );
-                    if ( isContentSyncable( sourceContent, targetContent ) )
+                return targetContext.callWith( () -> {
+                    if ( contentService.contentExists( contentId ) )
                     {
-                        return doSyncUpdated( sourceContent, targetContent );
+                        final Content targetContent = contentService.getById( contentId );
+                        if ( isContentSyncable( sourceContent, targetContent ) )
+                        {
+                            return doSyncUpdated( sourceContent, targetContent );
+                        }
                     }
-                }
-                return null;
-            } );
+                    return null;
+                } );
+            }
+            return null;
         } );
     }
 
@@ -312,19 +332,23 @@ public final class ParentProjectSynchronizer
         initContext( sourceProject, targetProject );
 
         return sourceContext.callWith( () -> {
-            final Content sourceContent = contentService.getById( contentId );
+            if ( contentService.contentExists( contentId ) )
+            {
+                final Content sourceContent = contentService.getById( contentId );
 
-            return targetContext.callWith( () -> {
-                if ( contentService.contentExists( contentId ) )
-                {
-                    final Content targetContent = contentService.getById( contentId );
-                    if ( isContentSyncable( sourceContent, targetContent ) )
+                return targetContext.callWith( () -> {
+                    if ( contentService.contentExists( contentId ) )
                     {
-                        return doSyncSorted( sourceContent, targetContent );
+                        final Content targetContent = contentService.getById( contentId );
+                        if ( isContentSyncable( sourceContent, targetContent ) )
+                        {
+                            return doSyncSorted( sourceContent, targetContent );
+                        }
                     }
-                }
-                return null;
-            } );
+                    return null;
+                } );
+            }
+            return null;
         } );
     }
 
@@ -631,10 +655,10 @@ public final class ParentProjectSynchronizer
 
         final EnumSet<ContentInheritType> inheritTypes = EnumSet.allOf( ContentInheritType.class );
 
-        if ( !source.getName().toString().equals( targetPath.getName() ) )
+       /* if ( !source.getName().toString().equals( targetPath.getName() ) )
         {
             inheritTypes.remove( ContentInheritType.NAME );
-        }
+        }*/
 
         return ImportContentParams.create().
             importContent( source ).
