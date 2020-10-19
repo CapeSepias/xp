@@ -37,8 +37,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 
 @Component
-public final class TaskManagerImpl
-    implements TaskManager
+public final class LocalTaskManagerImpl
+    implements LocalTaskManager
 {
     static final long KEEP_COMPLETED_MAX_TIME_SEC = 60;
 
@@ -57,8 +57,8 @@ public final class TaskManagerImpl
     private RecurringJob recurringJob;
 
     @Activate
-    public TaskManagerImpl( @Reference(service = TaskManagerExecutor.class) final Executor executor,
-                            @Reference TaskManagerCleanupScheduler cleanupScheduler )
+    public LocalTaskManagerImpl( @Reference(service = TaskManagerExecutor.class) final Executor executor,
+                                 @Reference TaskManagerCleanupScheduler cleanupScheduler )
     {
         this.executor = executor;
         this.tasks = new ConcurrentHashMap<>();
@@ -120,7 +120,8 @@ public final class TaskManagerImpl
 
         eventPublisher.publish( TaskEvents.submitted( info ) );
 
-        final TaskWrapper wrapper = new TaskWrapper( info, runnable, userContext, this );
+        final TaskWrapper wrapper =
+            new TaskWrapper( info, runnable, userContext.getBranch(), userContext.getRepositoryId(), userContext.getAuthInfo(), this );
         executor.execute( wrapper );
 
         return id;

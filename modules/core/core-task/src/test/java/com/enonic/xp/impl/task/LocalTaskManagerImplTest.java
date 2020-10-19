@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class TaskManagerImplTest
+public class LocalTaskManagerImplTest
 {
-    private TaskManagerImpl taskMan;
+    private LocalTaskManagerImpl taskMan;
 
     private List<Event> eventsPublished;
 
@@ -41,7 +41,7 @@ public class TaskManagerImplTest
     {
         cleanupScheduler = new TaskManagerCleanupSchedulerMock();
 
-        taskMan = new TaskManagerImpl( Runnable::run, cleanupScheduler );
+        taskMan = new LocalTaskManagerImpl( Runnable::run, cleanupScheduler );
         taskMan.activate();
         final AtomicInteger count = new AtomicInteger( 0 );
         taskMan.setIdGen( () -> TaskId.from( Integer.toString( count.incrementAndGet() ) ) );
@@ -135,7 +135,7 @@ public class TaskManagerImplTest
 
         latch.await();
 
-        Instant laterTime = initTime.plus( TaskManagerImpl.KEEP_COMPLETED_MAX_TIME_SEC + 1, ChronoUnit.SECONDS );
+        Instant laterTime = initTime.plus( LocalTaskManagerImpl.KEEP_COMPLETED_MAX_TIME_SEC + 1, ChronoUnit.SECONDS );
         taskMan.setClock( Clock.fixed( laterTime, ZoneId.systemDefault() ) );
         cleanupScheduler.rerun();
 

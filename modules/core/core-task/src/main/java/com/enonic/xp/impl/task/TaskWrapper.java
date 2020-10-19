@@ -28,7 +28,7 @@ final class TaskWrapper
 
     private final RunnableTask runnableTask;
 
-    private final TaskManagerImpl taskManager;
+    private final LocalTaskManagerImpl taskManager;
 
     private final Branch branch;
 
@@ -37,16 +37,16 @@ final class TaskWrapper
     private final AuthenticationInfo authInfo;
 
 
-    public TaskWrapper( final TaskInfo taskInfo, final RunnableTask runnableTask, final Context userContext,
-                        final TaskManagerImpl taskManager )
+    public TaskWrapper( final TaskInfo taskInfo, final RunnableTask runnableTask, final Branch branch, final RepositoryId repositoryId,
+                        AuthenticationInfo authInfo, final LocalTaskManagerImpl taskManager )
     {
         this.taskInfo = taskInfo;
         this.taskId = taskInfo.getId();
         this.runnableTask = runnableTask;
         this.taskManager = taskManager;
-        this.branch = userContext.getBranch();
-        this.repo = userContext.getRepositoryId();
-        this.authInfo = userContext.getAuthInfo();
+        this.branch = branch;
+        this.repo = repositoryId;
+        this.authInfo = authInfo;
     }
 
     @Override

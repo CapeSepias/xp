@@ -3,12 +3,12 @@ package com.enonic.xp.impl.task.distributed;
 import java.util.List;
 import java.util.Optional;
 
-import com.enonic.xp.impl.task.TaskManager;
+import com.enonic.xp.impl.task.LocalTaskManager;
 import com.enonic.xp.task.TaskId;
 import com.enonic.xp.task.TaskInfo;
 
 public final class SingleTaskReporter
-    implements SerializableFunction<TaskManager, List<TaskInfo>>
+    implements SerializableFunction<LocalTaskManager, List<TaskInfo>>
 {
     private static final long serialVersionUID = 0;
 
@@ -20,7 +20,7 @@ public final class SingleTaskReporter
     }
 
     @Override
-    public List<TaskInfo> apply( final TaskManager taskManager )
+    public List<TaskInfo> apply( final LocalTaskManager taskManager )
     {
         return Optional.ofNullable( taskManager.getTaskInfo( taskId ) ).map( List::of ).orElse( List.of() );
     }

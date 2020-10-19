@@ -10,38 +10,29 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import com.enonic.xp.data.PropertyTree;
-import com.enonic.xp.impl.task.script.NamedTaskScriptFactory;
+import com.enonic.xp.impl.task.distributed.TaskExecutor;
 import com.enonic.xp.page.DescriptorKey;
 import com.enonic.xp.task.RunnableTask;
-import com.enonic.xp.task.TaskDescriptor;
-import com.enonic.xp.task.TaskDescriptorService;
 import com.enonic.xp.task.TaskId;
 import com.enonic.xp.task.TaskInfo;
-import com.enonic.xp.task.TaskNotFoundException;
 import com.enonic.xp.task.TaskService;
-
-import static com.enonic.xp.impl.task.script.NamedTaskScript.SCRIPT_METHOD_NAME;
 
 @Component
 public final class TaskServiceImpl
     implements TaskService
 {
-    private final TaskManager taskManager;
+    private final LocalTaskManager taskManager;
 
-    private final TaskDescriptorService taskDescriptorService;
-
-    private final NamedTaskScriptFactory namedTaskScriptFactory;
+    private final TaskExecutor taskExecutor;
 
     private volatile TaskInfoManager taskInfoManager;
 
     @Activate
-    public TaskServiceImpl( @Reference final TaskManager taskManager, @Reference final TaskDescriptorService taskDescriptorService,
-                            @Reference final NamedTaskScriptFactory namedTaskScriptFactory )
+    public TaskServiceImpl( @Reference final LocalTaskManager taskManager, @Reference TaskExecutor taskExecutor )
     {
         this.taskManager = taskManager;
         this.taskInfoManager = taskManager;
-        this.taskDescriptorService = taskDescriptorService;
-        this.namedTaskScriptFactory = namedTaskScriptFactory;
+        this.taskExecutor = taskExecutor;
     }
 
     @Override
@@ -53,20 +44,14 @@ public final class TaskServiceImpl
     @Override
     public TaskId submitTask( final DescriptorKey key, final PropertyTree config )
     {
-        final TaskDescriptor descriptor = taskDescriptorService.getTasks( key.getApplicationKey() ).
-            filter( ( taskDesc ) -> taskDesc.getKey().equals( key ) ).first();
-        if ( descriptor == null )
+        if ( taskInfoManager instanceof ClusteredTaskManager )
         {
-            throw new TaskNotFoundException( key );
+            return ( (ClusteredTaskManager) taskInfoManager ).submitClustered( key.toString(), config );
         }
-
-        final RunnableTask runnableTask = namedTaskScriptFactory.create( descriptor, config );
-        if ( runnableTask == null )
+        else
         {
-            throw new TaskNotFoundException( key, "Missing exported function '" + SCRIPT_METHOD_NAME + "' in task script" );
+            return taskExecutor.submitLocal( key, config );
         }
-
-        return taskManager.submitTask( runnableTask, descriptor.getDescription(), key.toString() );
     }
 
     @Override

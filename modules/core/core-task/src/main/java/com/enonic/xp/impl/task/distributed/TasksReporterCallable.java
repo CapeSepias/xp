@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import com.enonic.xp.impl.task.LocalTaskManager;
 import com.enonic.xp.impl.task.OsgiSupport;
-import com.enonic.xp.impl.task.TaskManager;
 import com.enonic.xp.task.TaskInfo;
 
 public final class TasksReporterCallable
@@ -13,9 +13,9 @@ public final class TasksReporterCallable
 {
     private static final long serialVersionUID = 0;
 
-    private final SerializableFunction<TaskManager, List<TaskInfo>> function;
+    private final SerializableFunction<LocalTaskManager, List<TaskInfo>> function;
 
-    public TasksReporterCallable( final SerializableFunction<TaskManager, List<TaskInfo>> function )
+    public TasksReporterCallable( final SerializableFunction<LocalTaskManager, List<TaskInfo>> function )
     {
         this.function = function;
     }
@@ -23,6 +23,6 @@ public final class TasksReporterCallable
     @Override
     public List<TaskInfo> call()
     {
-        return OsgiSupport.withService( TaskManager.class, function, List.of() );
+        return OsgiSupport.withService( LocalTaskManager.class, function, List.of() );
     }
 }

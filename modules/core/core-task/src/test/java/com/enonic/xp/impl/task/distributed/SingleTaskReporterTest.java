@@ -2,7 +2,7 @@ package com.enonic.xp.impl.task.distributed;
 
 import org.junit.jupiter.api.Test;
 
-import com.enonic.xp.impl.task.TaskManager;
+import com.enonic.xp.impl.task.LocalTaskManager;
 import com.enonic.xp.task.TaskId;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -15,7 +15,7 @@ class SingleTaskReporterTest
     void apply()
     {
         final TaskId someTaskId = TaskId.from( "someTask" );
-        final TaskManager taskManager = mock( TaskManager.class );
+        final LocalTaskManager taskManager = mock( LocalTaskManager.class );
         new SingleTaskReporter( someTaskId ).apply( taskManager );
         verify( taskManager ).getTaskInfo( eq( someTaskId ) );
     }

@@ -9,11 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.enonic.xp.app.ApplicationKey;
 import com.enonic.xp.data.PropertyTree;
 import com.enonic.xp.descriptor.Descriptors;
-import com.enonic.xp.impl.task.script.NamedTaskScriptFactory;
+import com.enonic.xp.impl.task.distributed.TaskExecutor;
 import com.enonic.xp.page.DescriptorKey;
 import com.enonic.xp.task.RunnableTask;
 import com.enonic.xp.task.TaskDescriptor;
-import com.enonic.xp.task.TaskDescriptorService;
 import com.enonic.xp.task.TaskId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,20 +29,17 @@ class TaskServiceImplTest
 {
 
     @Mock
-    private TaskManager taskManager;
+    private LocalTaskManager taskManager;
 
     @Mock
-    private TaskDescriptorService taskDescriptorService;
-
-    @Mock
-    private NamedTaskScriptFactory namedTaskScriptFactory;
+    private TaskExecutor taskExecutor;
 
     private TaskServiceImpl taskService;
 
     @BeforeEach
     void setUp()
     {
-        taskService = new TaskServiceImpl( taskManager, taskDescriptorService, namedTaskScriptFactory );
+        taskService = new TaskServiceImpl( taskManager, taskExecutor );
     }
 
     @Test
