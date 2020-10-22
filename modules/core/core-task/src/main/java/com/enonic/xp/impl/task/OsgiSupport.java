@@ -1,5 +1,6 @@
 package com.enonic.xp.impl.task;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.osgi.framework.Bundle;
@@ -13,7 +14,7 @@ public final class OsgiSupport
     {
     }
 
-    public static <T, R> R withService( Class<T> serviceClass, Function<T, R> function, R noServiceValue )
+    public static <T, R> Optional<R> withService( Class<T> serviceClass, Function<T, R> function )
     {
         final Bundle bundle = FrameworkUtil.getBundle( serviceClass );
         if ( bundle == null )
@@ -33,11 +34,11 @@ public final class OsgiSupport
             {
                 if ( service != null )
                 {
-                    return function.apply( service );
+                    return Optional.of( function.apply( service ) );
                 }
                 else
                 {
-                    return noServiceValue;
+                    return Optional.empty();
                 }
             }
             finally
@@ -47,7 +48,7 @@ public final class OsgiSupport
         }
         else
         {
-            return noServiceValue;
+            return Optional.empty();
         }
     }
 }

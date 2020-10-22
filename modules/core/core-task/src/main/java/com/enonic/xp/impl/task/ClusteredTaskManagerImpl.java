@@ -14,7 +14,6 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
-import com.hazelcast.core.IQueue;
 import com.hazelcast.core.Member;
 import com.hazelcast.util.ExceptionUtil;
 
@@ -23,6 +22,7 @@ import com.enonic.xp.impl.task.distributed.AllTasksReporter;
 import com.enonic.xp.impl.task.distributed.RunningTasksReporter;
 import com.enonic.xp.impl.task.distributed.SerializableFunction;
 import com.enonic.xp.impl.task.distributed.SingleTaskReporter;
+import com.enonic.xp.impl.task.distributed.TaskSubmitterCallable;
 import com.enonic.xp.impl.task.distributed.TasksReporterCallable;
 import com.enonic.xp.task.TaskId;
 import com.enonic.xp.task.TaskInfo;
@@ -39,8 +39,6 @@ public final class ClusteredTaskManagerImpl
 
     private IExecutorService executorService;
 
-    private IQueue<PropertyTree> tasksQueue;
-
     @Activate
     public ClusteredTaskManagerImpl( @Reference final HazelcastInstance hazelcastInstance )
     {
@@ -51,7 +49,6 @@ public final class ClusteredTaskManagerImpl
     public void activate()
     {
         executorService = hazelcastInstance.getExecutorService( ACTION );
-        tasksQueue = hazelcastInstance.getQueue( "xp/taskQueue" );
     }
 
     @Override
@@ -101,12 +98,15 @@ public final class ClusteredTaskManagerImpl
     }
 
     @Override
-    public TaskId submitClustered( String key, final PropertyTree config )
+    public TaskId submitClustered( final String key, final PropertyTree config )
     {
-        final PropertyTree propertyTree = new PropertyTree();
-        propertyTree.addString( "key", key );
-        propertyTree.addSet( "config", config.getRoot().detach() );
-        tasksQueue.add( propertyTree );
-        return TaskId.from( "fake" );
+        try
+        {
+            return executorService.submit( new TaskSubmitterCallable( key, config ) ).get();
+        }
+        catch ( InterruptedException | ExecutionException e )
+        {
+            throw ExceptionUtil.rethrow( e );
+        }
     }
 }

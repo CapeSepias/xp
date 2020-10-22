@@ -23,6 +23,6 @@ public final class TasksReporterCallable
     @Override
     public List<TaskInfo> call()
     {
-        return OsgiSupport.withService( LocalTaskManager.class, function, List.of() );
+        return OsgiSupport.withService( LocalTaskManager.class, function ).orElse( List.of() );
     }
 }
